@@ -9,8 +9,6 @@
 import cv2
 import pygame, random, sys
 
-
-
 ##--------------- Initialize --------------------------------------------
 
 # openCV
@@ -22,6 +20,8 @@ while frame is None:
 
 cascPath = 'haarcascades/haarcascade_frontalface_default.xml'   # instantiate face detection
 faceCascade = cv2.CascadeClassifier(cascPath)
+mouthCascadePath = 'haarcascades/haarcascade_mcs_mouth.xml'
+mouthCascade = cv2.CascadeClassifier(mouthCascadePath)
 
 # variables
 WINDOWHEIGHT, width, depth = frame.shape  # image dimensions
@@ -35,9 +35,11 @@ newItemAt = 20
 RED     = (  0,   0, 255)
 GREEN   = (  0, 255,   0)
 BLUE    = (255,   0,   0)
+
 ##--------------- Main Loop ---------------------------------------------
 while True:
     ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)	# mirror orientation for game
 
     # face detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -45,7 +47,7 @@ while True:
         gray,
         scaleFactor=1.1,
         minNeighbors=5,
-        minSize=(30, 30),
+        minSize=(100, 100),
         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
     )
 
