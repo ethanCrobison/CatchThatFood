@@ -40,6 +40,7 @@ while True:
     # draw a rectangle around faces
     for (x, y, w, h) in faces:
     	cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    cv2.line(frame, (0,0),(width,height),(255,0,0),5)
 
     # update frame
     cv2.imshow('game_window', frame)
