@@ -9,6 +9,8 @@
 import cv2
 import pygame, random, sys
 
+
+
 ##--------------- Initialize --------------------------------------------
 
 # openCV
@@ -20,8 +22,6 @@ while frame is None:
 
 cascPath = 'haarcascades/haarcascade_frontalface_default.xml'   # instantiate face detection
 faceCascade = cv2.CascadeClassifier(cascPath)
-mouthCascadePath = 'haarcascades/haarcascade_mcs_mouth.xml'
-mouthCascade = cv2.CascadeClassifier(mouthCascadePath)
 
 # variables
 WINDOWHEIGHT, width, depth = frame.shape  # image dimensions
@@ -35,11 +35,9 @@ newItemAt = 20
 RED     = (  0,   0, 255)
 GREEN   = (  0, 255,   0)
 BLUE    = (255,   0,   0)
-
 ##--------------- Main Loop ---------------------------------------------
 while True:
     ret, frame = cap.read()
-    frame = cv2.flip(frame, 1)	# mirror orientation for game
 
     # face detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -61,9 +59,8 @@ while True:
             tw = i['width']
 
             if tx+tw > x and tx < x+w and ty > y and ty+th < y+h:
-                i['color'] = GREEN
-            elif i['color'] != RED:
-                i['color'] = RED
+                items.remove(i)
+                points += 10
 
     
     # game stuff
@@ -89,11 +86,12 @@ while True:
         if ty + th >= WINDOWHEIGHT:
             items.remove(i)
             continue
-
-        i['y'] += 5
+        i['y'] += 10
         cv2.rectangle(frame, (tx,ty),(tx+tw,ty+th),co,2)
 
-
+    # handle score
+    cv2.putText(frame,"Points: %d" %(points),(10,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
+    
     # update frame
     cv2.imshow('game_window', frame)
 
