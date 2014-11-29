@@ -6,38 +6,43 @@
 ## EECS 332 Digital Image Analysis Fall 2014
 ## Professor Ying Wu
 ##
-
-
-import numpy as np
 import cv2
-##import random, time
 
-##  pass 0 or -1 to use default cam
+# instantiate webcam feed
+# pass 0 or -1 to use default cam
 cap = cv2.VideoCapture(0)
+
+# check that frame is valid
 ret, frame = cap.read()
-
-##  create window ahead of time
-cv2.namedWindow('Gray', cv2.WINDOW_NORMAL)
-
-##  check that frame is valid
 while frame is None:
     ret, frame = cap.read()
 
+# instantiate face detection
+cascPath = 'haarcascade_frontalface_default.xml'
+faceCascade = cv2.CascadeClassifier(cascPath)
 
 ##--------------- Main Loop ---------------------------------------------
 while True:
-##  read frame  
     ret, frame = cap.read()
 
-##  operate on frame
+		# face detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = faceCascade.detectMultiScale(
+    	gray,
+    	scaleFactor=1.1,
+    	minNeighbors=5,
+    	minSize=(30, 30),
+    	flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+    )
 
-##  display frame
-    cv2.imshow('Gray', gray)
+    # draw a rectangle around faces
+    for (x, y, w, h) in faces:
+    	cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
+		# update frame
+    cv2.imshow('game_window', frame)
 
-
-##  check for quitting
+ 		# check for quitting
     if cv2.waitKey(1) & 0xFF == ord('m'):
         break
 
