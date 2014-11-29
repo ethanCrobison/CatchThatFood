@@ -17,6 +17,8 @@ ret, frame = cap.read()
 while frame is None:
     ret, frame = cap.read()
 
+height, width, depth = frame.shape
+
 # instantiate face detection
 cascPath = 'haarcascade_frontalface_default.xml'
 faceCascade = cv2.CascadeClassifier(cascPath)
@@ -25,7 +27,7 @@ faceCascade = cv2.CascadeClassifier(cascPath)
 while True:
     ret, frame = cap.read()
 
-		# face detection
+    # face detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = faceCascade.detectMultiScale(
     	gray,
@@ -39,16 +41,16 @@ while True:
     for (x, y, w, h) in faces:
     	cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-		# update frame
+    # update frame
     cv2.imshow('game_window', frame)
 
- 		# check for quitting
+    # check for quitting
     if cv2.waitKey(1) & 0xFF == ord('m'):
         break
 
 ##-----------------------------------------------------------------------
 
-cv2.waitKey(0)
+
 ##  mission critical
 cap.release()
 cv2.destroyAllWindows()
