@@ -9,6 +9,9 @@
 import cv2
 import pygame, random, sys
 
+##--------------- Functions ---------------------------------------------
+def within(outer, inner):
+    print 'Placeholder'
 
 
 ##--------------- Initialize --------------------------------------------
@@ -24,13 +27,18 @@ cascPath = 'haarcascades/haarcascade_frontalface_default.xml'   # instantiate fa
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 # variables
-WINDOWHEIGHT, width, depth = frame.shape  # image dimensions
-
+WINDOWHEIGHT, WINDOWWIDTH, depth = frame.shape  # image dimensions
+XHALF = WINDOWWIDTH / 2
+YHALF = WINDOWHEIGHT / 2
 points = 0  # score
 
 items = []
 itemCounter = 1
 newItemAt = 20
+
+traps = []
+trapCounter = -40
+newTrapAt = 30
 
 RED     = (  0,   0, 255)
 GREEN   = (  0, 255,   0)
@@ -63,18 +71,31 @@ while True:
                 points += 10
 
     
-    # game stuff
+    # add items, etc.
     itemCounter += 1
     if itemCounter > newItemAt:
         itemCounter = 1
         newItem = {
-            'x': 200+random.randint(-150, 150),
+            'x': XHALF + random.randint(-XHALF + 50, XHALF - 50),
             'y': 10,
             'width': 10,
             'height': 10,
             'color': RED
             }
         items.append(newItem)
+
+    trapCounter += 1
+    if trapCounter > newTrapAt:
+        trapCounter = 1
+        newTrap = {
+            'x': 10,
+            'y': YHALF + random.randint(-YHALF + 50, YHALF -50),
+            'width': 10,
+            'height': 10,
+            'color': BLUE,
+            'speed': random.randint(5, 15)
+            }
+        traps.append(newTrap)
 
     # handle items
     for i in items:
@@ -89,12 +110,23 @@ while True:
         i['y'] += 10
         cv2.rectangle(frame, (tx,ty),(tx+tw,ty+th),co,2)
 
+    for t in traps:
+        tx = t['x']
+        ty = t['y']
+        th = t['height']
+        tw = t['width']
+        co = t['color']
+        if tx + tw >= WINDOWWIDTH:
+            traps.remove(t)
+            continue
+        t['x'] += t['speed']
+        cv2.rectangle(frame, (tx,ty),(tx+tw,ty+th),co,2)
+
     # handle score
     cv2.putText(frame,"Points: %d" %(points),(10,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
     
     # update frame
     cv2.imshow('game_window', frame)
-
 
     # check for quitting
     if cv2.waitKey(1) & 0xFF == ord('m'):
