@@ -26,6 +26,7 @@ faceCascade = cv2.CascadeClassifier(cascPath)
 ##--------------- Main Loop ---------------------------------------------
 while True:
     ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)	# mirror orientation for game
 
     # face detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
