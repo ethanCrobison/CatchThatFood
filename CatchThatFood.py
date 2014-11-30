@@ -24,6 +24,9 @@ def outside(item, screenDim):
 # pygame
 pygame.init()
 
+# music
+pygame.mixer.music.load("mp3/supermario.mp3")
+
 # openCV
 cap = cv2.VideoCapture(0)   # instantiate webcam feed
 
@@ -68,6 +71,13 @@ healC       = -100  # heal item counter
 NEWHEAL     = 50    # interval
 
 mouthRect = pygame.Rect(0,0,0,0)
+
+pygame.mixer.music.play(loops=-1)
+
+coin = pygame.mixer.Sound("mp3/coin.wav")
+power_up = pygame.mixer.Sound("mp3/power_up.wav")
+power_down = pygame.mixer.Sound("mp3/power_down.wav")
+
 
 ##--------------- Main Loop ---------------------------------------------
 while True:
@@ -122,6 +132,13 @@ while True:
 
             isColliding = mouthRect.collidelist(rectList)
             if isColliding > -1:
+            	if items[isColliding]['po'] > 0:
+            		coin.play()
+            	elif items[isColliding]['hp'] > 0:
+            		power_up.play()
+            	else:
+            		power_down.play()
+
             	points += items[isColliding]['po']
             	health += items[isColliding]['hp']
             	if health > 5:
