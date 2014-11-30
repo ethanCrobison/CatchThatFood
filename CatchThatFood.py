@@ -8,6 +8,7 @@
 ##
 import cv2
 import pygame, random, sys
+from operator import itemgetter
 
 ##--------------- Functions ---------------------------------------------
 def within(outer, inner):
@@ -23,8 +24,10 @@ ret, frame = cap.read()     # check that frame is valid
 while frame is None:
     ret, frame = cap.read()
 
-cascPath = 'haarcascades/haarcascade_frontalface_default.xml'   # instantiate face detection
-faceCascade = cv2.CascadeClassifier(cascPath)
+faceCascadePath = 'haarcascades/haarcascade_frontalface_default.xml'   # instantiate face detection
+faceCascade = cv2.CascadeClassifier(faceCascadePath)
+mouthCascadePath = 'haarcascades/haarcascade_mcs_mouth.xml'
+mouthCascade = cv2.CascadeClassifier(mouthCascadePath)
 
 # variables
 WINDOWHEIGHT, WINDOWWIDTH, depth = frame.shape  # image dimensions
@@ -40,26 +43,51 @@ traps = []
 trapCounter = -40
 newTrapAt = 30
 
+# RGB CODES
 RED     = (  0,   0, 255)
 GREEN   = (  0, 255,   0)
 BLUE    = (255,   0,   0)
 ##--------------- Main Loop ---------------------------------------------
 while True:
     ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)
 
     # face detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = faceCascade.detectMultiScale(
         gray,
         scaleFactor=1.1,
-        minNeighbors=5,
+        minNeighbors=3,
         minSize=(100, 100),
         flags=cv2.cv.CV_HAAR_SCALE_IMAGE
     )
 
-    # draw a rectangle around faces
     for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    	# cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+    	roi_gray = gray[y:y+h, x:x+w]
+    	roi_color = frame[y:y+h, x:x+w]
+
+    	mouths = mouthCascade.detectMultiScale(
+    		roi_gray,
+	    	scaleFactor=1.1,
+	    	minNeighbors=5,
+	    	minSize=(50, 30),
+	    	flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+    	)
+
+    	if list(mouths):
+	    	y_values = zip(*mouths)[1]
+	    	max_index = y_values.index(max(y_values))
+	    	lowest_mouth = mouths[max_index]
+
+	    	mx = lowest_mouth[0]
+	    	my = lowest_mouth[1]
+	    	mw = lowest_mouth[2]
+	    	mh = lowest_mouth[3]
+	    	cv2.rectangle(roi_color,(mx,my),(mx+mw,my+mh),(0,0,255),2)
+
+    # draw a rectangle around faces
+    for (x,y,w,h) in faces:
         for i in items:
             tx = i['x']
             ty = i['y']
