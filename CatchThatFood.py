@@ -7,19 +7,22 @@
 ## Professor Ying Wu
 ##
 import cv2
-import pygame, random, sys
-from operator import itemgetter
+import pygame, random
+
 
 ##--------------- Functions ---------------------------------------------
 def within(outer, inner):
     print 'Placeholder'
 
 def outside(item, screenDim):
-    return item['x']+item['w'] >= screenDim[0] or item['y']+item['h'] >= screenDim[1]
+    return item.right>screenDim[0] or item.bottom>screenDim[1]
         
 
 
 ##--------------- Initialize --------------------------------------------
+
+# pygame
+pygame.init()
 
 # openCV
 cap = cv2.VideoCapture(0)   # instantiate webcam feed
@@ -41,13 +44,17 @@ DIMS = [WINDOWWIDTH, WINDOWHEIGHT]
 XHALF = WINDOWWIDTH / 2
 YHALF = WINDOWHEIGHT / 2
 
+PBUFF   = 80    # minimun distance from border
+TBUFF   = 80
+HBUFF   = 100
+
 RED     = (  0,   0, 255)
 GREEN   = (  0, 255,   0)
 BLUE    = (255,   0,   0)
 
 # variables
 points = 0  # score
-health = 5
+health = 5  # "health"
 
 items = []
 
@@ -59,6 +66,8 @@ NEWTRAP     = 30    # interval
 
 healC       = -100  # heal item counter
 NEWHEAL     = 50    # interval
+
+mouthRect = pygame.Rect(0,0,0,0)
 
 ##--------------- Main Loop ---------------------------------------------
 while True:
@@ -76,38 +85,40 @@ while True:
     )
 
     for (x, y, w, h) in faces:
-    	# cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
-    	roi_gray = gray[y:y+h, x:x+w]
-    	roi_color = frame[y:y+h, x:x+w]
+        # cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+        roi_gray = gray[y:y+h, x:x+w]
+        roi_color = frame[y:y+h, x:x+w]
 
-    	mouths = mouthCascade.detectMultiScale(
-    		roi_gray,
-	    	scaleFactor=1.1,
-	    	minNeighbors=5,
-	    	minSize=(50, 30),
-	    	flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-    	)
+        mouths = mouthCascade.detectMultiScale(
+            roi_gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(50, 30),
+            flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+        )
 
-    	if list(mouths):
-	    	y_values = zip(*mouths)[1]
-	    	max_index = y_values.index(max(y_values))
-	    	lowest_mouth = mouths[max_index]
+        if list(mouths):
+            y_values = zip(*mouths)[1]
+            max_index = y_values.index(max(y_values))
+            lowest_mouth = mouths[max_index]
 
-	    	mx = lowest_mouth[0]
-	    	my = lowest_mouth[1]
-	    	mw = lowest_mouth[2]
-	    	mh = lowest_mouth[3]
-	    	cv2.rectangle(roi_color,(mx,my),(mx+mw,my+mh),(0,0,255),2)
+            mouthRect.x = lowest_mouth[0]
+            mouthRect.y = lowest_mouth[1]
+            mouthRect.w = lowest_mouth[2]
+            mouthRect.h = lowest_mouth[3]
+            cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
 
-	    	for i in items[:]:
-		        tx = i['x']
-		        ty = i['y']
-		        th = i['h']
-		        tw = i['w']
+            mouthRect.x += x
+            mouthRect.y += y
 
-		        if tx+tw > mx+x and tx < mx+x+mw and ty > my+y and ty+th < my+y+mh:
-		            items.remove(i)
-		            points += i['po']
+            for i in items[:]:
+                if mouthRect.colliderect(i['rect']):
+                    items.remove(i)
+                    points += i['po']
+                    health += i['hp']
+                    if health > 5:
+                        health = 5
+                    
     
     # add items, etc.
     pointC  += 1
@@ -117,45 +128,39 @@ while True:
     if pointC > NEWPOINT:
         pointC = 1
         newItem = {
-            'x': random.randint(20, WINDOWWIDTH - 20),    # x coord
-            'y': 10,    # y coord
+            'rect': pygame.Rect(random.randint(PBUFF, WINDOWWIDTH-PBUFF),10,10,10),
             'xs': 0,    # x speed
             'ys': 10,   # y speed
-            'w': 10,    # width
-            'h': 10,    # height
             'co': RED,  # color
             'po': 10,   # points value
-            't': 0     
+            't': 0,
+            'hp':0 
             }
         items.append(newItem)
         
     if trapC > NEWTRAP:
         trapC = 1
         newItem = {
-            'x': 10,    # x coord
-            'y': random.randint(20, WINDOWHEIGHT - 20),    # y coord
+            'rect': pygame.Rect(10,random.randint(TBUFF, WINDOWHEIGHT-TBUFF),10,10),
             'xs': random.randint(5, 10), # x speed
             'ys': 0,    # y speed
-            'w': 10,    # width
-            'h': 10,    # height
             'co': BLUE, # color
             'po': 0,    # points value
-            't': 0     
+            't': 0,
+            'hp':-1     # healing
             }
         items.append(newItem)
         
     if healC > NEWHEAL:
         healC = 1
         newItem = {
-            'x': random.randint(50, WINDOWWIDTH - 50),    # x coord
-            'y': random.randint(50, WINDOWHEIGHT - 50),    # y coord
+            'rect': pygame.Rect(random.randint(HBUFF,WINDOWWIDTH-HBUFF),random.randint(HBUFF,WINDOWHEIGHT-HBUFF),20,20),
             'xs': 0,    # x speed
-            'ys': 0,   # y speed
-            'w': 20,    # width
-            'h': 20,    # height
-            'co': GREEN,  # color
-            'po': 0,   # points value
-            't': 30     # time on screen
+            'ys': 0,    # y speed
+            'co': GREEN,# color
+            'po': 0,    # points value
+            't': 30,    # time on screen
+            'hp': 1     # healing
             }
         items.append(newItem)
 
@@ -163,9 +168,8 @@ while True:
 
     # handle ALL items
     for i in items[:]:
-        i['x'] += i['xs']
-        i['y'] += i['ys']
-        if outside(i, DIMS):
+        i['rect'].move_ip(i['xs'],i['ys'])
+        if outside(i['rect'], DIMS):
             items.remove(i)
             continue
         if i['t']:
@@ -174,7 +178,7 @@ while True:
                 items.remove(i)
 
     for i in items:
-        cv2.rectangle(frame, (i['x'],i['y']),(i['x']+i['w'],i['y']+i['h']),i['co'],2)
+        cv2.rectangle(frame, i['rect'].topleft,i['rect'].bottomright,i['co'],2)
 
     # handle GUI
     cv2.putText(frame,"Points: %d" %(points),(150,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
@@ -183,6 +187,7 @@ while True:
     if health <= 0:     # game over
         cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_COMPLEX,5,255)
         cv2.imshow('game_window', frame)
+        cv2.waitKey(0)
         break
     
     # update frame
@@ -193,8 +198,6 @@ while True:
         break
 
 ##-----------------------------------------------------------------------
-
-cv2.waitKey(0)
 
 ##  mission critical
 cap.release()
