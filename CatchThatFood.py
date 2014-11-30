@@ -25,7 +25,7 @@ def outside(item, screenDim):
 pygame.init()
 
 # music
-pygame.mixer.music.load("mp3/supermario.mp3")
+pygame.mixer.music.load("sound/supermario.mp3")
 
 # openCV
 cap = cv2.VideoCapture(0)   # instantiate webcam feed
@@ -74,9 +74,11 @@ mouthRect = pygame.Rect(0,0,0,0)
 
 pygame.mixer.music.play(loops=-1)
 
-coin = pygame.mixer.Sound("mp3/coin.wav")
-power_up = pygame.mixer.Sound("mp3/power_up.wav")
-power_down = pygame.mixer.Sound("mp3/power_down.wav")
+coin = pygame.mixer.Sound("sound/coin.wav")
+power_up = pygame.mixer.Sound("sound/power_up.wav")
+power_down = pygame.mixer.Sound("sound/power_down.wav")
+hank = pygame.mixer.Sound("sound/hank.wav")
+mario_die = pygame.mixer.Sound("sound/mariodie.wav")
 
 
 ##--------------- Main Loop ---------------------------------------------
@@ -213,6 +215,11 @@ while True:
     if health <= 0:     # game over
         cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_COMPLEX,5,255)
         cv2.imshow('game_window', frame)
+
+        pygame.mixer.music.stop()
+        mario_die.play()
+        hank.play()
+
         cv2.waitKey(0)
         break
     
