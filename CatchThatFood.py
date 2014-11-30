@@ -14,6 +14,10 @@ from operator import itemgetter
 def within(outer, inner):
     print 'Placeholder'
 
+def outside(item, screenDim):
+    return item['x']+item['w'] >= screenDim[0] or item['y']+item['h'] >= screenDim[1]
+        
+
 
 ##--------------- Initialize --------------------------------------------
 
@@ -29,24 +33,33 @@ faceCascade = cv2.CascadeClassifier(faceCascadePath)
 mouthCascadePath = 'haarcascades/haarcascade_mcs_mouth.xml'
 mouthCascade = cv2.CascadeClassifier(mouthCascadePath)
 
-# variables
+##--------------- Game Stuff --------------------------------------------
+# constants
 WINDOWHEIGHT, WINDOWWIDTH, depth = frame.shape  # image dimensions
+DIMS = [WINDOWWIDTH, WINDOWHEIGHT]
+
 XHALF = WINDOWWIDTH / 2
 YHALF = WINDOWHEIGHT / 2
-points = 0  # score
 
-items = []
-itemCounter = 1
-newItemAt = 20
-
-traps = []
-trapCounter = -40
-newTrapAt = 30
-
-# RGB CODES
 RED     = (  0,   0, 255)
 GREEN   = (  0, 255,   0)
 BLUE    = (255,   0,   0)
+
+# variables
+points = 0  # score
+health = 5
+
+items = []
+
+pointC      = 0     # good item counter
+NEWPOINT    = 20    # interval
+
+trapC       = -60   # trap item counter
+NEWTRAP     = 30    # interval
+
+healC       = -100  # heal item counter
+NEWHEAL     = 50    # interval
+
 ##--------------- Main Loop ---------------------------------------------
 while True:
     ret, frame = cap.read()
@@ -86,69 +99,91 @@ while True:
 	    	mh = lowest_mouth[3]
 	    	cv2.rectangle(roi_color,(mx,my),(mx+mw,my+mh),(0,0,255),2)
 
-	    	for i in items:
+	    	for i in items[:]:
 		        tx = i['x']
 		        ty = i['y']
-		        th = i['height']
-		        tw = i['width']
+		        th = i['h']
+		        tw = i['w']
 
 		        if tx+tw > mx+x and tx < mx+x+mw and ty > my+y and ty+th < my+y+mh:
 		            items.remove(i)
-		            points += 10
+		            points += i['po']
     
     # add items, etc.
-    itemCounter += 1
-    if itemCounter > newItemAt:
-        itemCounter = 1
+    pointC  += 1
+    trapC   += 1
+    healC   += 1
+
+    if pointC > NEWPOINT:
+        pointC = 1
         newItem = {
-            'x': XHALF + random.randint(-XHALF + 50, XHALF - 50),
-            'y': 10,
-            'width': 10,
-            'height': 10,
-            'color': RED
+            'x': random.randint(20, WINDOWWIDTH - 20),    # x coord
+            'y': 10,    # y coord
+            'xs': 0,    # x speed
+            'ys': 10,   # y speed
+            'w': 10,    # width
+            'h': 10,    # height
+            'co': RED,  # color
+            'po': 10,   # points value
+            't': 0     
+            }
+        items.append(newItem)
+        
+    if trapC > NEWTRAP:
+        trapC = 1
+        newItem = {
+            'x': 10,    # x coord
+            'y': random.randint(20, WINDOWHEIGHT - 20),    # y coord
+            'xs': random.randint(5, 10), # x speed
+            'ys': 0,    # y speed
+            'w': 10,    # width
+            'h': 10,    # height
+            'co': BLUE, # color
+            'po': 0,    # points value
+            't': 0     
+            }
+        items.append(newItem)
+        
+    if healC > NEWHEAL:
+        healC = 1
+        newItem = {
+            'x': random.randint(50, WINDOWWIDTH - 50),    # x coord
+            'y': random.randint(50, WINDOWHEIGHT - 50),    # y coord
+            'xs': 0,    # x speed
+            'ys': 0,   # y speed
+            'w': 20,    # width
+            'h': 20,    # height
+            'co': GREEN,  # color
+            'po': 0,   # points value
+            't': 30     # time on screen
             }
         items.append(newItem)
 
-    trapCounter += 1
-    if trapCounter > newTrapAt:
-        trapCounter = 1
-        newTrap = {
-            'x': 10,
-            'y': YHALF + random.randint(-YHALF + 50, YHALF -50),
-            'width': 10,
-            'height': 10,
-            'color': BLUE,
-            'speed': random.randint(5, 15)
-            }
-        traps.append(newTrap)
+    
 
-    # handle items
-    for i in items:
-        tx = i['x']
-        ty = i['y']
-        th = i['height']
-        tw = i['width']
-        co = i['color']
-        if ty + th >= WINDOWHEIGHT:
+    # handle ALL items
+    for i in items[:]:
+        i['x'] += i['xs']
+        i['y'] += i['ys']
+        if outside(i, DIMS):
             items.remove(i)
             continue
-        i['y'] += 10
-        cv2.rectangle(frame, (tx,ty),(tx+tw,ty+th),co,2)
+        if i['t']:
+            i['t'] -= 1
+            if i['t'] <= 0:
+                items.remove(i)
 
-    for t in traps:
-        tx = t['x']
-        ty = t['y']
-        th = t['height']
-        tw = t['width']
-        co = t['color']
-        if tx + tw >= WINDOWWIDTH:
-            traps.remove(t)
-            continue
-        t['x'] += t['speed']
-        cv2.rectangle(frame, (tx,ty),(tx+tw,ty+th),co,2)
+    for i in items:
+        cv2.rectangle(frame, (i['x'],i['y']),(i['x']+i['w'],i['y']+i['h']),i['co'],2)
 
-    # handle score
-    cv2.putText(frame,"Points: %d" %(points),(10,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
+    # handle GUI
+    cv2.putText(frame,"Points: %d" %(points),(150,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
+    cv2.rectangle(frame, (20, 200),(40, 200-30*health),RED,-1)  # -1 is filled
+
+    if health <= 0:     # game over
+        cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_COMPLEX,5,255)
+        cv2.imshow('game_window', frame)
+        break
     
     # update frame
     cv2.imshow('game_window', frame)
@@ -159,6 +194,7 @@ while True:
 
 ##-----------------------------------------------------------------------
 
+cv2.waitKey(0)
 
 ##  mission critical
 cap.release()
