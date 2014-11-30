@@ -33,7 +33,7 @@ while frame is None:
 
 faceCascadePath = 'haarcascades/haarcascade_frontalface_default.xml'   # instantiate face detection
 faceCascade = cv2.CascadeClassifier(faceCascadePath)
-mouthCascadePath = 'haarcascades/haarcascade_mcs_mouth.xml'
+mouthCascadePath = 'haarcascades/Mouth.xml'
 mouthCascade = cv2.CascadeClassifier(mouthCascadePath)
 
 ##--------------- Game Stuff --------------------------------------------
@@ -86,14 +86,14 @@ while True:
 
     for (x, y, w, h) in faces:
         # cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
-        roi_gray = gray[y:y+h, x:x+w]
-        roi_color = frame[y:y+h, x:x+w]
+        roi_gray = gray[y+h/2:y+h, x:x+w]
+        roi_color = frame[y+h/2:y+h, x:x+w]
 
         mouths = mouthCascade.detectMultiScale(
             roi_gray,
             scaleFactor=1.1,
             minNeighbors=3,
-            minSize=(25, 50),
+            minSize=(50, 50),
             flags=cv2.cv.CV_HAAR_SCALE_IMAGE
         )
 
@@ -114,7 +114,7 @@ while True:
             cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
 
             mouthRect.x += x
-            mouthRect.y += y
+            mouthRect.y += y+h/2
 
             rectList = []
             for i in items:
