@@ -92,8 +92,8 @@ while True:
         mouths = mouthCascade.detectMultiScale(
             roi_gray,
             scaleFactor=1.1,
-            minNeighbors=5,
-            minSize=(50, 30),
+            minNeighbors=3,
+            minSize=(25, 50),
             flags=cv2.cv.CV_HAAR_SCALE_IMAGE
         )
 
@@ -102,22 +102,31 @@ while True:
             max_index = y_values.index(max(y_values))
             lowest_mouth = mouths[max_index]
 
+            BUFFER = 10
             mouthRect.x = lowest_mouth[0]
+            mouthRect.x += BUFFER
             mouthRect.y = lowest_mouth[1]
+            mouthRect.y += BUFFER
             mouthRect.w = lowest_mouth[2]
+            mouthRect.w -= (2*BUFFER)
             mouthRect.h = lowest_mouth[3]
+            mouthRect.h -= (2*BUFFER)
             cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
 
             mouthRect.x += x
             mouthRect.y += y
 
-            for i in items[:]:
-                if mouthRect.colliderect(i['rect']):
-                    items.remove(i)
-                    points += i['po']
-                    health += i['hp']
-                    if health > 5:
-                        health = 5
+            rectList = []
+            for i in items:
+            	rectList.append(i['rect'])
+
+            isColliding = mouthRect.collidelist(rectList)
+            if isColliding > -1:
+            	points += items[isColliding]['po']
+            	health += items[isColliding]['hp']
+            	if health > 5:
+            		health = 5
+            	del items[isColliding]
                     
     
     # add items, etc.
