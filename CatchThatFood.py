@@ -86,18 +86,15 @@ while True:
 	    	mh = lowest_mouth[3]
 	    	cv2.rectangle(roi_color,(mx,my),(mx+mw,my+mh),(0,0,255),2)
 
-    # draw a rectangle around faces
-    for (x,y,w,h) in faces:
-        for i in items:
-            tx = i['x']
-            ty = i['y']
-            th = i['height']
-            tw = i['width']
+	    	for i in items:
+		        tx = i['x']
+		        ty = i['y']
+		        th = i['height']
+		        tw = i['width']
 
-            if tx+tw > x and tx < x+w and ty > y and ty+th < y+h:
-                items.remove(i)
-                points += 10
-
+		        if tx+tw > mx+x and tx < mx+x+mw and ty > my+y and ty+th < my+y+mh:
+		            items.remove(i)
+		            points += 10
     
     # add items, etc.
     itemCounter += 1
