@@ -14,7 +14,7 @@ def outside(item, screenDim):
 
 def myDraw(re, im):
     for c in range(0, 3):
-        frame[re.top:re.top+im.shape[0],re.left:re.left+im.shape[1],c]=im[:,:,c]*(im[:,:,c]/255.0)+frame[re.top:re.top+im.shape[0],re.left:re.left+im.shape[1],c]*(1.0-oneup[:,:,3]/255.0)
+        frame[re.top:re.top+im.shape[0],re.left:re.left+im.shape[1],c]=im[:,:,c]*(im[:,:,c]/255.0)+frame[re.top:re.top+im.shape[0],re.left:re.left+im.shape[1],c]*(1.0-im[:,:,3]/255.0)
 
 
 # OpenCV face detection algorithms
