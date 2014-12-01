@@ -43,7 +43,7 @@ BLUE    = (255,   0,   0)
 
 # variables
 points = 0  # score
-health = 5  # "health"
+lives = 5
 
 items = []
 
@@ -116,17 +116,17 @@ while True:
 
             isColliding = mouthRect.collidelist(rectList)
             if isColliding > -1:
-            	if items[isColliding]['po'] > 0:
+            	if items[isColliding]['id'] == 0:
             		coin.play()
-            	elif items[isColliding]['hp'] > 0:
-            		power_up.play()
-            	else:
+            	elif items[isColliding]['id'] == 1:
             		power_down.play()
+            	elif items[isColliding]['id'] == 2:
+            		power_up.play()
 
             	points += items[isColliding]['po']
-            	health += items[isColliding]['hp']
-            	if health > 5:
-            		health = 5
+            	lives += items[isColliding]['hp']
+            	if lives > 5:
+            		lives = 5
             	del items[isColliding]
                     
     
@@ -138,32 +138,33 @@ while True:
     if pointC > NEWPOINT:
         pointC = 1
         newItem = {
+        	'id': 0,
             'rect': pygame.Rect(random.randint(PBUFF, WINDOWWIDTH-PBUFF),10,10,10),
             'xs': 0,    # x speed
             'ys': 10,   # y speed
             'co': RED,  # color
             'po': 10,   # points value
-            't': 0,
-            'hp':0 
+            'hp': 0
             }
         items.append(newItem)
         
     if trapC > NEWTRAP:
         trapC = 1
         newItem = {
+        	'id': 1,
             'rect': pygame.Rect(10,random.randint(TBUFF, WINDOWHEIGHT-TBUFF),10,10),
             'xs': random.randint(5, 10), # x speed
             'ys': 0,    # y speed
             'co': BLUE, # color
             'po': 0,    # points value
-            't': 0,
-            'hp':-1     # healing
+            'hp': -1     # healing
             }
         items.append(newItem)
         
     if healC > NEWHEAL:
         healC = 1
         newItem = {
+        	'id': 2,
             'rect': pygame.Rect(random.randint(HBUFF,WINDOWWIDTH-HBUFF),random.randint(HBUFF,WINDOWHEIGHT-HBUFF),20,20),
             'xs': 0,    # x speed
             'ys': 0,    # y speed
@@ -174,15 +175,13 @@ while True:
             }
         items.append(newItem)
 
-    
-
     # handle ALL items
     for i in items[:]:
         i['rect'].move_ip(i['xs'],i['ys'])
         if outside(i['rect'], DIMS):
             items.remove(i)
             continue
-        if i['t']:
+        if i['id'] == 2:
             i['t'] -= 1
             if i['t'] <= 0:
                 items.remove(i)
@@ -190,9 +189,9 @@ while True:
 
     # handle GUI
     cv2.putText(frame,"Points: %d" %(points),(150,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
-    cv2.rectangle(frame, (20, 200),(40, 200-30*health),RED,-1)  # -1 is filled
+    cv2.rectangle(frame, (20, 200),(40, 200-30*lives),RED,-1)  # -1 is filled
 
-    if health <= 0:     # game over
+    if lives <= 0:     # game over
         cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_COMPLEX,5,255)
         cv2.imshow('game_window', frame)
 
