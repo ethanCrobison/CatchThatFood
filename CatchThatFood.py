@@ -7,6 +7,7 @@
 ##
 import cv2
 import pygame, random
+import numpy as np
 
 # function to check if item is outside the bounds of the screen
 def outside(item, screenDim):
@@ -16,6 +17,15 @@ def myDraw(re, im):
     for c in range(0, 3):
         frame[re.top:re.top+im.shape[0],re.left:re.left+im.shape[1],c]=im[:,:,c]*(im[:,:,c]/255.0)+frame[re.top:re.top+im.shape[0],re.left:re.left+im.shape[1],c]*(1.0-im[:,:,3]/255.0)
 
+def removeArray(L,arr):
+    ind = 0
+    size = len(L)
+    while ind != size and not np.array_equal(L[ind],arr):
+        ind += 1
+    if ind != size:
+        L.pop(ind)
+    else:
+        raise ValueError('array not found in list.')
 
 # OpenCV face detection algorithms
 faceCascadePath = 'haarcascades/haarcascade_frontalface_default.xml'
@@ -139,33 +149,33 @@ while True:
 
             rectList = []
             for i in items:
-            	rectList.append(i['rect'])
+                rectList.append(i['rect'])
 
             isColliding = mouthRect.collidelist(rectList)
             if isColliding > -1:
-            	if items[isColliding]['id'] == 0:
-            		coin.play()
-            	elif items[isColliding]['id'] == 1:
-            		power_down.play()
-            	elif items[isColliding]['id'] == 2:
-            		power_up.play()
+                if items[isColliding]['id'] == 0:
+                    coin.play()
+                elif items[isColliding]['id'] == 1:
+                    power_down.play()
+                elif items[isColliding]['id'] == 2:
+                    power_up.play()
 
-            	points += items[isColliding]['po']
-            	lives += items[isColliding]['hp']
-            	if lives > 5:
-            		lives = 5
-            	del items[isColliding]
+                points += items[isColliding]['po']
+                lives += items[isColliding]['hp']
+                if lives > 5:
+                    lives = 5
+                del items[isColliding]
                     
     
     # add items, etc.
-    pointC	+= 1
+    pointC  += 1
     trapC   += 1
     healC   += 1
 
     if pointC > NEWPOINT:
         pointC = 1
         newItem = {
-        	'id': 0,
+            'id': 0,
             'rect': pygame.Rect(random.randint(PBUFF, WINDOWWIDTH-PBUFF),10,ITEMSIZE,ITEMSIZE),
             'im': fruit[random.randint(0,2)],
             'xs': 0,    # x speed
@@ -178,7 +188,7 @@ while True:
     if trapC > NEWTRAP:
         trapC = 1
         newItem = {
-        	'id': 1,
+            'id': 1,
             'rect': pygame.Rect(10,random.randint(TBUFF, WINDOWHEIGHT-TBUFF),ITEMSIZE,ITEMSIZE),
             'im': enemies[random.randint(0,3)],
             'xs': random.randint(5, 10), # x speed
@@ -191,7 +201,7 @@ while True:
     if healC > NEWHEAL:
         healC = 1
         newItem = {
-        	'id': 2,
+            'id': 2,
             'rect': pygame.Rect(random.randint(HBUFF,WINDOWWIDTH-HBUFF),random.randint(HBUFF,WINDOWHEIGHT-HBUFF),ITEMSIZE,ITEMSIZE),
             'im': oneup,
             'xs': 0,    # x speed
@@ -206,8 +216,7 @@ while True:
     for i in items[:]:
         i['rect'].move_ip(i['xs'],i['ys'])
         if outside(i['rect'], DIMS):
-            items.remove(i)
-            continue
+            removeArray(items, i)
         if i['id'] == 2:
             i['t'] -= 1
             if i['t'] <= 0:
