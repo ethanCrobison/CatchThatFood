@@ -1,4 +1,3 @@
-##
 ## CatchThatFood!
 ##
 ## Created by Ethan Robison & Michael Wang
@@ -9,39 +8,26 @@
 import cv2
 import pygame, random
 
-
-##--------------- Functions ---------------------------------------------
-def within(outer, inner):
-    print 'Placeholder'
-
+# function to check if item is outside the bounds of the screen
 def outside(item, screenDim):
     return item.right>screenDim[0] or item.bottom>screenDim[1]
-        
 
-
-##--------------- Initialize --------------------------------------------
-
-# pygame
-pygame.init()
-
-# music
-pygame.mixer.music.load("sound/supermario.mp3")
-
-# openCV
-cap = cv2.VideoCapture(0)   # instantiate webcam feed
-
-ret, frame = cap.read()     # check that frame is valid
-while frame is None:
-    ret, frame = cap.read()
-
-faceCascadePath = 'haarcascades/haarcascade_frontalface_default.xml'   # instantiate face detection
+# OpenCV face detection algorithms
+faceCascadePath = 'haarcascades/haarcascade_frontalface_default.xml'
 faceCascade = cv2.CascadeClassifier(faceCascadePath)
 mouthCascadePath = 'haarcascades/Mouth.xml'
 mouthCascade = cv2.CascadeClassifier(mouthCascadePath)
 
-##--------------- Game Stuff --------------------------------------------
-# constants
-WINDOWHEIGHT, WINDOWWIDTH, depth = frame.shape  # image dimensions
+# OpenCV webcame feed - loop until frame is valid
+cap = cv2.VideoCapture(0)
+ret, frame = cap.read()
+while frame is None:
+    ret, frame = cap.read()
+   	
+pygame.init()
+
+## PYGAME CONSTANTS
+WINDOWHEIGHT, WINDOWWIDTH, _ = frame.shape
 DIMS = [WINDOWWIDTH, WINDOWHEIGHT]
 
 XHALF = WINDOWWIDTH / 2
@@ -72,16 +58,17 @@ NEWHEAL     = 50    # interval
 
 mouthRect = pygame.Rect(0,0,0,0)
 
-pygame.mixer.music.play(loops=-1)
-
+# pygame sound clips
 coin = pygame.mixer.Sound("sound/coin.wav")
 power_up = pygame.mixer.Sound("sound/power_up.wav")
 power_down = pygame.mixer.Sound("sound/power_down.wav")
 hank = pygame.mixer.Sound("sound/hank.wav")
 mario_die = pygame.mixer.Sound("sound/mariodie.wav")
 
+# pygame background music
+pygame.mixer.music.load("sound/supermario.mp3")
+pygame.mixer.music.play(loops=-1)
 
-##--------------- Main Loop ---------------------------------------------
 while True:
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
