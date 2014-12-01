@@ -26,7 +26,7 @@ while frame is None:
 
 pygame.init()
 
-## PYGAME CONSTANTS
+## PYGAME CONSTANT
 WINDOWHEIGHT, WINDOWWIDTH, _ = frame.shape
 DIMS = [WINDOWWIDTH, WINDOWHEIGHT]
 
@@ -101,19 +101,14 @@ while True:
             max_index = y_values.index(max(y_values))
             lowest_mouth = mouths[max_index]
 
+            # mouthRect is mouth collision area - BUFFER shrinks it, x, y, and h/2 correct for the fact that lower_mouth coordinates are in the frame of the face detected area
             BUFFER = 10
-            mouthRect.x = lowest_mouth[0]
-            mouthRect.x += BUFFER
-            mouthRect.y = lowest_mouth[1]
-            mouthRect.y += BUFFER
-            mouthRect.w = lowest_mouth[2]
-            mouthRect.w -= (2*BUFFER)
-            mouthRect.h = lowest_mouth[3]
-            mouthRect.h -= (2*BUFFER)
-            cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
+            mouthRect.x = lowest_mouth[0] + BUFFER + x
+            mouthRect.y = lowest_mouth[1] + BUFFER + y + h/2
+            mouthRect.w = lowest_mouth[2] - (BUFFER * 2)
+            mouthRect.h = lowest_mouth[3] - (BUFFER * 2)
 
-            mouthRect.x += x
-            mouthRect.y += y+h/2
+            # cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
 
             rectList = []
             for i in items:
@@ -136,7 +131,7 @@ while True:
                     
     
     # add items, etc.
-    pointC  += 1
+    pointC	+= 1
     trapC   += 1
     healC   += 1
 
@@ -191,8 +186,6 @@ while True:
             i['t'] -= 1
             if i['t'] <= 0:
                 items.remove(i)
-
-    for i in items:
         cv2.rectangle(frame, i['rect'].topleft,i['rect'].bottomright,i['co'],2)
 
     # handle GUI
