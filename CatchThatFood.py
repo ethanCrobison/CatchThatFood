@@ -103,12 +103,15 @@ while True:
 
             # mouthRect is mouth collision area - BUFFER shrinks it, x, y, and h/2 correct for the fact that lower_mouth coordinates are in the frame of the face detected area
             BUFFER = 10
-            mouthRect.x = lowest_mouth[0] + BUFFER + x
-            mouthRect.y = lowest_mouth[1] + BUFFER + y + h/2
+            mouthRect.x = lowest_mouth[0] + BUFFER
+            mouthRect.y = lowest_mouth[1] + BUFFER
             mouthRect.w = lowest_mouth[2] - (BUFFER * 2)
             mouthRect.h = lowest_mouth[3] - (BUFFER * 2)
 
-            # cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
+            cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
+
+            mouthRect.x += x
+            mouthRect.y += y + h/2
 
             rectList = []
             for i in items:
