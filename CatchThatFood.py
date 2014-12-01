@@ -18,12 +18,12 @@ faceCascade = cv2.CascadeClassifier(faceCascadePath)
 mouthCascadePath = 'haarcascades/Mouth.xml'
 mouthCascade = cv2.CascadeClassifier(mouthCascadePath)
 
-# OpenCV webcame feed - loop until frame is valid
+# OpenCV webcam feed - loop until frame is valid
 cap = cv2.VideoCapture(0)
 ret, frame = cap.read()
 while frame is None:
     ret, frame = cap.read()
-   	
+
 pygame.init()
 
 ## PYGAME CONSTANTS
