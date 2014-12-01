@@ -191,11 +191,11 @@ while True:
         cv2.rectangle(frame, i['rect'].topleft,i['rect'].bottomright,i['co'],2)
 
     # handle GUI
-    cv2.putText(frame,"Points: %d" %(points),(150,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
+    cv2.putText(frame,"Points: %d" %(points),(175,55),cv2.FONT_HERSHEY_DUPLEX,2,(255,255,255))
     cv2.rectangle(frame, (20, 200),(40, 200-30*lives),RED,-1)  # -1 is filled
 
     if lives <= 0:     # game over
-        cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_COMPLEX,5,255)
+        cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_DUPLEX,5,(255,255,255))
         cv2.imshow('game_window', frame)
 
         pygame.mixer.music.stop()
