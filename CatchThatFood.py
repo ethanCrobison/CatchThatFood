@@ -67,7 +67,7 @@ mario_die = pygame.mixer.Sound("sound/mariodie.wav")
 
 # pygame background music
 pygame.mixer.music.load("sound/supermario.mp3")
-pygame.mixer.music.play(loops=-1)
+pygame.mixer.music.play(-1)
 
 while True:
     ret, frame = cap.read()
