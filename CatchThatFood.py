@@ -127,12 +127,15 @@ while True:
 
             # mouthRect is mouth collision area - BUFFER shrinks it, x, y, and h/2 correct for the fact that lower_mouth coordinates are in the frame of the face detected area
             BUFFER = 10
-            mouthRect.x = lowest_mouth[0] + BUFFER + x
-            mouthRect.y = lowest_mouth[1] + BUFFER + y + h/2
+            mouthRect.x = lowest_mouth[0] + BUFFER
+            mouthRect.y = lowest_mouth[1] + BUFFER
             mouthRect.w = lowest_mouth[2] - (BUFFER * 2)
             mouthRect.h = lowest_mouth[3] - (BUFFER * 2)
 
-            # cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
+            cv2.rectangle(roi_color,mouthRect.topleft,mouthRect.bottomright,(0,0,255),2)
+
+            mouthRect.x += x
+            mouthRect.y += y + h/2
 
             rectList = []
             for i in items:
@@ -214,13 +217,13 @@ while True:
         myDraw(i['rect'], i['im'])
 
     # handle GUI
-    cv2.putText(frame,"Points: %d" %(points),(150,55),cv2.FONT_HERSHEY_COMPLEX,2,255)
+    cv2.putText(frame,"Points: %d" %(points),(150,55),cv2.FONT_HERSHEY_COMPLEX,2,(255,255,255))
     for hp in range(lives):
         lifeRect.y = (200 - hp*(LIFESIZE+10))
         myDraw(lifeRect, life)
 
     if lives <= 0:     # game over
-        cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_COMPLEX,5,255)
+        cv2.putText(frame, "GG", (XHALF-100,YHALF),cv2.FONT_HERSHEY_DUPLEX,5,(255,255,255))
         cv2.imshow('game_window', frame)
 
         pygame.mixer.music.stop()
